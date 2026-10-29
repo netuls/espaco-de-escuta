@@ -453,4 +453,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .member .tx { flex: 1; min-width: 0; }
 .member .tx strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .member .tx small { color: var(--muted); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.member .since { color: var(--muted); font-size: 11px; flex: none; }
+.member .since { color: var(--muted); font-size: 11px; flex: none; } 
+
+/* ---- Painel sem emojis: o humor aparece como número ---- */
+.item .emo { font-size: 18px; font-weight: 700; font-family: var(--font-display); color: var(--c); }
+
