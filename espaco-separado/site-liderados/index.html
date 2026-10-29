@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Espaço de Escuta</title>
+  <meta name="description" content="Um espaço seguro e confidencial para dizer como você está e, se quiser, conversar com a liderança.">
+  <meta name="theme-color" content="#070b16">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <span class="brand-mark">💬</span>
+      <span class="brand-name">Espaço de Escuta<span class="brand-sub">Check-in de bem-estar do time</span></span>
+    </a>
+    <a class="btn ghost small" id="admin-link" href="#" hidden>Área da liderança</a>
+  </header>
+
+  <main class="container">
+    <!-- ================= VISÃO PRINCIPAL ================= -->
+    <section id="view-main">
+      <div class="hero">
+        <h1>Como você está <em>hoje?</em></h1>
+        <p>Um espaço seguro e confidencial para você dizer como se sente — e, se quiser, conversar com alguém da liderança. Se identificar é totalmente opcional.</p>
+        <div class="trust">
+          <span class="chip accent">🔒 Identificação opcional</span>
+          <span class="chip accent">🤝 Só a liderança escolhida vê</span>
+          <span class="chip accent">⏱️ Leva menos de 1 minuto</span>
+        </div>
+      </div>
+
+      <div id="resume" class="card resume" hidden>
+        <span>💬 Você tem uma conversa em andamento com <strong id="resume-name"></strong>.</span>
+        <button class="btn primary small" id="resume-btn">Continuar conversa</button>
+      </div>
+
+      <div class="card wizard">
+        <div class="progress" aria-hidden="true">
+          <span class="dot on" data-dot="1"></span><span class="dot" data-dot="2"></span><span class="dot" data-dot="3"></span>
+        </div>
+
+        <!-- Passo 1: humor -->
+        <div class="step active" data-step="1">
+          <h2>De 1 a 5, como você está se sentindo?</h2>
+          <p class="sub">Escolha a opção que mais combina com o seu momento.</p>
+          <div class="moods" id="moods" role="radiogroup" aria-label="Humor de 1 a 5"></div>
+          <div class="mood-caption" id="mood-caption"></div>
+          <div class="actions" style="justify-content:flex-end">
+            <button class="btn primary" id="to-2" disabled>Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Passo 2: liderança -->
+        <div class="step" data-step="2">
+          <h2>Quer conversar com alguém da liderança?</h2>
+          <p class="sub">Escolha com quem você se sente à vontade. Só essa pessoa terá acesso à sua conversa.</p>
+          <div class="leaders" id="leaders"></div>
+          <div class="actions"><button class="btn ghost" data-back="1">← Voltar</button></div>
+        </div>
+
+        <!-- Passo 3: detalhes -->
+        <div class="step" data-step="3">
+          <h2>Conversa com <span id="pick-name"></span></h2>
+          <p class="sub">Você decide se quer se identificar. Em qualquer caso, a conversa continua pelo site com um código só seu.</p>
+          <div class="choice">
+            <label><input type="radio" name="ident" value="anon" checked><strong>🕶️ Anônimo(a)</strong><span>A liderança não saberá quem você é.</span></label>
+            <label><input type="radio" name="ident" value="named"><strong>🙋 Quero me identificar</strong><span>A liderança verá o nome que você informar.</span></label>
+          </div>
+          <div class="field" id="name-field" hidden>
+            <label class="label" for="name">Seu nome</label>
+            <input class="input" id="name" maxlength="60" autocomplete="name" placeholder="Como você gostaria de ser chamado(a)?">
+          </div>
+          <div class="field">
+            <label class="label" for="msg">O que você gostaria de compartilhar? <span style="font-weight:400">(opcional)</span></label>
+            <textarea class="textarea" id="msg" maxlength="2000" placeholder="Escreva com liberdade. Você pode contar só o que se sentir confortável."></textarea>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" data-back="2">← Voltar</button>
+            <button class="btn primary" id="send">Enviar para a liderança</button>
+          </div>
+        </div>
+
+        <!-- Passo 4: concluído (com conversa) -->
+        <div class="step" data-step="4">
+          <span class="done-emoji">✅</span>
+          <h2>Pedido enviado!</h2>
+          <p class="sub"><span id="done-name"></span> vai poder responder por aqui. Guarde o código abaixo para voltar à conversa.</p>
+          <div class="code-box">
+            <span class="code" id="done-code"></span>
+            <button class="btn small" id="copy-code">Copiar código</button>
+          </div>
+          <div class="notice">⚠️ Este código é a <strong>única forma</strong> de acessar a conversa, inclusive se você ficou anônimo(a). Nós não conseguimos recuperá-lo se for perdido. Neste aparelho, ele fica salvo automaticamente.</div>
+          <div class="actions" style="justify-content:flex-end">
+            <button class="btn primary" id="open-thread">Abrir conversa</button>
+          </div>
+        </div>
+
+        <!-- Passo 5: concluído (só humor) -->
+        <div class="step" data-step="5">
+          <span class="done-emoji">💜</span>
+          <h2>Obrigado por compartilhar</h2>
+          <p class="sub">Seu check-in foi registrado de forma anônima. Se mudar de ideia, é só voltar e escolher alguém da liderança para conversar.</p>
+          <div class="actions" style="justify-content:flex-end">
+            <button class="btn primary" id="again">Fazer outro check-in</button>
+          </div>
+        </div>
+      </div>
+
+      <details class="recover">
+        <summary>Já tenho um código de acesso</summary>
+        <form id="recover-form">
+          <input class="input" id="recover-code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" required>
+          <button class="btn primary" type="submit">Abrir conversa</button>
+        </form>
+      </details>
+    </section>
+
+    <!-- ================= CONVERSA ================= -->
+    <section id="view-thread" hidden>
+      <div class="card chat">
+        <div class="chat-head">
+          <button class="btn small ghost" id="leave">← Sair</button>
+          <div id="chat-avatar"></div>
+          <div class="grow">
+            <h3 id="chat-title"></h3>
+            <small id="chat-sub"></small>
+          </div>
+          <span class="chip" id="chat-status"></span>
+          <button class="btn small" id="chat-code" title="Copiar código de acesso">🔑 Código</button>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <form class="composer" id="composer">
+          <textarea class="textarea" id="reply" rows="1" maxlength="2000" placeholder="Escreva sua mensagem…"></textarea>
+          <button class="btn primary" type="submit" id="reply-btn">Enviar</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

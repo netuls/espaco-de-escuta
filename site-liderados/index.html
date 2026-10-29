@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Espaço de Escuta · Cardápio Web</title>
+  <meta name="description" content="Um espaço seguro e confidencial para dizer como você está e, se quiser, conversar com a liderança.">
+  <meta name="theme-color" content="#0d0618">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="assets/mascote-avatar.jpg" alt="Mascote da Cardápio Web" width="44" height="44">
+      <span class="brand-name">Espaço de Escuta<span class="brand-sub">Cardápio Web · check-in de bem-estar</span></span>
+    </a>
+    <div class="topbar-right">
+      <div class="who" id="who" hidden><span>Olá, <strong id="who-name"></strong></span><button class="btn small" id="logout" type="button">Sair</button></div>
+      <a class="btn ghost small" id="admin-link" href="#" hidden>Área da liderança</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- ================= LOGIN / CADASTRO ================= -->
+    <section id="view-auth" hidden>
+      <div class="auth-wrap">
+        <div class="card auth">
+          <img class="done-mascot" src="assets/mascote-avatar.jpg" alt="" width="84" height="84">
+          <h1>Bem-vindo(a) ao Espaço de Escuta</h1>
+          <p class="sub">Entre ou crie sua conta para acessar. O login só libera o acesso: seus check-ins <strong>não ficam ligados ao seu nome</strong>, a não ser que você escolha se identificar.</p>
+          <div class="tabs" role="tablist">
+            <button type="button" class="tab on" data-tab="login" role="tab">Entrar</button>
+            <button type="button" class="tab" data-tab="signup" role="tab">Criar conta</button>
+          </div>
+          <form id="auth-form" autocomplete="on">
+            <div class="field" id="f-name" hidden>
+              <label class="label" for="a-name">Seu nome</label>
+              <input class="input" id="a-name" maxlength="80" autocomplete="name" placeholder="Como devemos te chamar?">
+            </div>
+            <div class="field">
+              <label class="label" for="a-email">E-mail</label>
+              <input class="input" id="a-email" type="email" autocomplete="username" required placeholder="voce@email.com">
+            </div>
+            <div class="field">
+              <label class="label" for="a-pass">Senha</label>
+              <input class="input" id="a-pass" type="password" minlength="8" autocomplete="current-password" required placeholder="Mínimo de 8 caracteres">
+            </div>
+            <div class="field" id="f-team" hidden>
+              <label class="label" for="a-team">Qual é a sua equipe?</label>
+              <select class="input" id="a-team"><option value="">Selecione…</option></select>
+            </div>
+            <div class="err-line" id="auth-err" role="alert"></div>
+            <button class="btn primary" style="width:100%" id="auth-btn" type="submit">Entrar</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VISÃO PRINCIPAL ================= -->
+    <section id="view-main" hidden>
+      <div class="hero">
+        <figure class="mascot-hero">
+          <img src="assets/mascote-cena.jpg" alt="Nosso mascote de jaleco e óculos, sentado na poltrona, pronto para ouvir você" width="360" height="360">
+          <figcaption>“Você pode falar sobre tudo.” 💜</figcaption>
+        </figure>
+        <h1>Como você está <em>hoje?</em></h1>
+        <p>Um espaço seguro e confidencial para você dizer como se sente — e, se quiser, conversar com alguém da liderança. Se identificar é totalmente opcional.</p>
+        <div class="trust">
+          <span class="chip accent">🔒 Identificação opcional</span>
+          <span class="chip accent">🤝 Só a liderança escolhida vê</span>
+          <span class="chip accent">⏱️ Leva menos de 1 minuto</span>
+        </div>
+      </div>
+
+      <div id="resume" class="card resume" hidden>
+        <span>💬 Você tem uma conversa em andamento com <strong id="resume-name"></strong>. <span class="badge wait" id="resume-new" hidden>📅 Novo agendamento</span></span>
+        <button class="btn primary small" id="resume-btn">Continuar conversa</button>
+      </div>
+
+      <div class="card wizard">
+        <div class="progress" aria-hidden="true">
+          <span class="dot on" data-dot="1"></span><span class="dot" data-dot="2"></span><span class="dot" data-dot="3"></span>
+        </div>
+
+        <!-- Passo 1: humor -->
+        <div class="step active" data-step="1">
+          <h2>De 1 a 5, como você está se sentindo?</h2>
+          <p class="sub">Escolha a opção que mais combina com o seu momento.</p>
+          <div class="moods" id="moods" role="radiogroup" aria-label="Humor de 1 a 5"></div>
+          <div class="mood-caption" id="mood-caption"></div>
+          <div class="actions" style="justify-content:flex-end">
+            <button class="btn primary" id="to-2" disabled>Continuar →</button>
+          </div>
+        </div>
+
+        <!-- Passo 2: liderança -->
+        <div class="step" data-step="2">
+          <h2>Quer conversar com alguém da liderança?</h2>
+          <p class="sub">Escolha com quem você se sente à vontade. Só essa pessoa terá acesso à sua conversa.</p>
+          <div class="leaders" id="leaders"></div>
+          <div class="actions"><button class="btn ghost" data-back="1">← Voltar</button></div>
+        </div>
+
+        <!-- Passo 3: detalhes -->
+        <div class="step" data-step="3">
+          <h2>Conversa com <span id="pick-name"></span></h2>
+          <p class="sub">Você decide como prefere conversar e se quer se identificar. Em qualquer caso, o acompanhamento continua pelo site com um código só seu.</p>
+          <div class="label" style="margin-bottom:8px">Como você prefere conversar?</div>
+          <div class="choice" id="mode-choice">
+            <label><input type="radio" name="mode" value="chat" checked><strong>💬 Por chat</strong><span>Conversa escrita aqui no site, no seu ritmo.</span></label>
+            <label><input type="radio" name="mode" value="presencial"><strong>🤝 Presencial</strong><span>A liderança vai combinar com você dia, hora e local.</span></label>
+          </div>
+          <div class="notice soft" id="mode-hint" hidden>💜 Combinado! Depois de enviar, a liderança agenda o encontro e você é avisado(a) aqui no site. Se quiser, conte abaixo melhores dias e horários.</div>
+          <div class="label" style="margin:16px 0 8px">Quer se identificar?</div>
+          <div class="choice">
+            <label><input type="radio" name="ident" value="anon" checked><strong>🕶️ Anônimo(a)</strong><span>A liderança não saberá quem você é.</span></label>
+            <label><input type="radio" name="ident" value="named"><strong>🙋 Quero me identificar</strong><span>A liderança verá o nome que você informar.</span></label>
+          </div>
+          <div class="field" id="name-field" hidden>
+            <label class="label" for="name">Seu nome</label>
+            <input class="input" id="name" maxlength="60" autocomplete="name" placeholder="Como você gostaria de ser chamado(a)?">
+          </div>
+          <div class="field">
+            <label class="label" for="msg"><span id="msg-label">O que você gostaria de compartilhar?</span> <span style="font-weight:400">(opcional)</span></label>
+            <textarea class="textarea" id="msg" maxlength="2000" placeholder="Escreva com liberdade. Você pode contar só o que se sentir confortável."></textarea>
+          </div>
+          <div class="actions">
+            <button class="btn ghost" data-back="2">← Voltar</button>
+            <button class="btn primary" id="send">Enviar para a liderança</button>
+          </div>
+        </div>
+
+        <!-- Passo 4: concluído (com conversa) -->
+        <div class="step" data-step="4">
+          <span class="done-emoji">✅</span>
+          <h2>Pedido enviado!</h2>
+          <p class="sub"><span id="done-name"></span> <span id="done-text">vai poder responder por aqui.</span> Guarde o código abaixo para voltar à conversa.</p>
+          <div class="code-box">
+            <span class="code" id="done-code"></span>
+            <button class="btn small" id="copy-code">Copiar código</button>
+          </div>
+          <div class="notice">⚠️ Este código é a <strong>única forma</strong> de acessar a conversa, inclusive se você ficou anônimo(a). Nós não conseguimos recuperá-lo se for perdido. Neste aparelho, ele fica salvo automaticamente.</div>
+          <div class="actions" style="justify-content:flex-end">
+            <button class="btn primary" id="open-thread">Abrir conversa</button>
+          </div>
+        </div>
+
+        <!-- Passo 5: concluído (só humor) -->
+        <div class="step" data-step="5">
+          <img class="done-mascot" src="assets/mascote-avatar.jpg" alt="" width="84" height="84">
+          <h2>Obrigado por compartilhar</h2>
+          <p class="sub">Seu check-in foi registrado de forma anônima. Se mudar de ideia, é só voltar e escolher alguém da liderança para conversar.</p>
+          <div class="actions" style="justify-content:flex-end">
+            <button class="btn primary" id="again">Fazer outro check-in</button>
+          </div>
+        </div>
+      </div>
+
+      <details class="recover">
+        <summary>Já tenho um código de acesso</summary>
+        <form id="recover-form">
+          <input class="input" id="recover-code" placeholder="XXXX-XXXX-XXXX-XXXX" autocomplete="off" required>
+          <button class="btn primary" type="submit">Abrir conversa</button>
+        </form>
+      </details>
+    </section>
+
+    <!-- ================= CONVERSA ================= -->
+    <section id="view-thread" hidden>
+      <div class="card chat">
+        <div class="chat-head">
+          <button class="btn small ghost" id="leave">← Sair</button>
+          <div id="chat-avatar"></div>
+          <div class="grow">
+            <h3 id="chat-title"></h3>
+            <small id="chat-sub"></small>
+          </div>
+          <span class="chip" id="chat-status"></span>
+          <button class="btn small" id="chat-code" title="Copiar código de acesso">🔑 Código</button>
+        </div>
+        <div class="agenda-box" id="agenda-box" hidden></div>
+        <div class="survey" id="survey" hidden>
+          <div class="survey-head">
+            <img src="assets/mascote-avatar.jpg" alt="" width="52" height="52">
+            <div>
+              <h3>Como foi para você?</h3>
+              <p>Esta conversa foi encerrada. Leva uns 20 segundos e ajuda a liderança a cuidar melhor do time. 💜</p>
+            </div>
+          </div>
+          <div class="q"><strong>1. Como você está agora, depois da conversa?</strong><div class="moods" id="sv-moods"></div></div>
+          <div class="q"><strong>2. Como você avalia a conversa?</strong><div class="stars" id="sv-stars" role="radiogroup" aria-label="Nota de 1 a 5"></div><small id="sv-star-label" class="muted"></small></div>
+          <div class="q"><label class="label" for="sv-comment">Quer deixar um comentário? <span style="font-weight:400">(opcional)</span></label>
+            <textarea class="textarea" id="sv-comment" maxlength="1000" rows="2" placeholder="O que foi bom? O que podemos melhorar?"></textarea></div>
+          <div class="actions" style="margin-top:4px">
+            <button class="btn ghost" id="sv-skip" type="button">Agora não</button>
+            <button class="btn primary" id="sv-send" type="button" disabled>Enviar pesquisa</button>
+          </div>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <form class="composer" id="composer">
+          <textarea class="textarea" id="reply" rows="1" maxlength="2000" placeholder="Escreva sua mensagem…"></textarea>
+          <button class="btn primary" type="submit" id="reply-btn">Enviar</button>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

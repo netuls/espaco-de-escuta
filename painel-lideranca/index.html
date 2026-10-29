@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Área da liderança · Espaço de Escuta · Cardápio Web</title>
+  <meta name="theme-color" content="#0d0618">
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+
+  <header class="topbar">
+    <a class="brand" href="index.html">
+      <img class="brand-mark" src="assets/mascote-avatar.jpg" alt="Mascote da Cardápio Web" width="44" height="44">
+      <span class="brand-name">Espaço de Escuta<span class="brand-sub">Cardápio Web · área da liderança</span></span>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center">
+      <div class="who" id="who" hidden></div>
+      <button class="btn small" id="pw-btn" hidden>🔑 Trocar senha</button>
+      <button class="btn small" id="logout" hidden>Sair</button>
+      <a class="btn ghost small" id="back-site" href="#" hidden>← Voltar ao site</a>
+    </div>
+  </header>
+
+  <!-- ================= LOGIN ================= -->
+  <main class="container" id="view-login">
+    <div class="auth-wrap">
+      <form class="card auth" id="login-form">
+        <img class="done-mascot" src="assets/mascote-avatar.jpg" alt="" width="84" height="84">
+        <h1>Entrar</h1>
+        <p class="sub">Acesso exclusivo das lideranças. Você verá apenas as conversas destinadas a você.</p>
+        <div class="field">
+          <label class="label" for="email">E-mail</label>
+          <input class="input" id="email" type="email" autocomplete="username" required placeholder="voce@empresa.com">
+        </div>
+        <div class="field">
+          <label class="label" for="password">Senha</label>
+          <input class="input" id="password" type="password" autocomplete="current-password" required placeholder="••••••••">
+        </div>
+        <div class="err-line" id="login-err" role="alert"></div>
+        <button class="btn primary" style="width:100%" id="login-btn" type="submit">Entrar</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- ================= PAINEL ================= -->
+  <main class="container" id="view-dash" hidden>
+    <div class="stats" id="stats"></div>
+
+    <div class="panels">
+      <div class="card panel">
+        <h3>Como o time está (30 dias)</h3>
+        <p class="sub">Distribuição dos check-ins — inclui os registros sem pedido de conversa.</p>
+        <div class="dist" id="dist"></div>
+      </div>
+      <div class="card panel">
+        <h3>Tendência dos últimos 14 dias</h3>
+        <p class="sub">Humor médio por dia (1 a 5).</p>
+        <div class="trend" id="trend"></div>
+      </div>
+    </div>
+
+    <div class="card panel agenda-panel">
+      <h3>📅 Agenda de conversas presenciais</h3>
+      <p class="sub">Próximos encontros que você marcou. O liderado é avisado no site dele e o registro fica nas duas pontas.</p>
+      <div class="agenda-list" id="agenda-list"></div>
+    </div>
+
+    <div class="inbox">
+      <div class="card list-panel">
+        <div class="filters" id="filters">
+          <button data-f="wait" class="on">Aguardando</button>
+          <button data-f="open">Abertas</button>
+          <button data-f="closed">Encerradas</button>
+          <button data-f="all">Todas</button>
+        </div>
+        <div class="items" id="items"></div>
+      </div>
+
+      <div class="card thread-panel" id="thread-panel">
+        <div class="thread-empty" id="thread-empty">
+          <div style="font-size:44px">💬</div>
+          <p>Selecione uma conversa para ler e responder.</p>
+        </div>
+        <div id="thread" hidden style="display:flex;flex-direction:column;height:100%;min-height:0">
+          <div class="chat-head">
+            <button class="btn small ghost back" id="thread-back">← Voltar</button>
+            <div class="grow">
+              <h3 id="t-title"></h3>
+              <small id="t-sub"></small>
+            </div>
+            <button class="btn small primary" id="t-schedule">📅 Agendar</button>
+            <button class="btn small" id="t-toggle"></button>
+          </div>
+          <div class="agenda-box" id="t-agenda" hidden></div>
+          <div class="feedback-box" id="t-feedback" hidden></div>
+          <div class="msgs" id="t-msgs"></div>
+          <form class="composer" id="t-composer">
+            <textarea class="textarea" id="t-reply" rows="1" maxlength="2000" placeholder="Responder…"></textarea>
+            <button class="btn primary" type="submit" id="t-send">Enviar</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= AGENDAR ================= -->
+  <dialog id="ag-dialog" class="card modal">
+    <form id="ag-form" class="pad" autocomplete="off">
+      <h2>Agendar conversa</h2>
+      <p class="sub" id="ag-who"></p>
+      <div class="field-row">
+        <div class="field">
+          <label class="label" for="ag-date">Data</label>
+          <input class="input" id="ag-date" type="date" required>
+        </div>
+        <div class="field">
+          <label class="label" for="ag-time">Horário</label>
+          <input class="input" id="ag-time" type="time" required>
+        </div>
+      </div>
+      <div class="field">
+        <label class="label" for="ag-place">Local</label>
+        <input class="input" id="ag-place" maxlength="200" required placeholder="Ex.: Sala de reunião 2, café, videochamada…">
+      </div>
+      <div class="field">
+        <label class="label" for="ag-notes">Observações <span style="font-weight:400">(opcional)</span></label>
+        <textarea class="textarea" id="ag-notes" maxlength="600" rows="3" placeholder="Algo que o liderado precisa saber antes do encontro."></textarea>
+      </div>
+      <div class="err-line" id="ag-err" role="alert"></div>
+      <div class="actions" style="margin-top:0">
+        <button type="button" class="btn ghost" id="ag-cancel">Cancelar</button>
+        <button type="submit" class="btn primary" id="ag-save">Agendar e avisar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ================= TROCAR SENHA ================= -->
+  <dialog id="pw-dialog" class="card modal">
+    <form id="pw-form" class="pad" autocomplete="off">
+      <h2>Trocar senha</h2>
+      <p class="sub">Informe a senha atual e escolha uma nova (mínimo de 8 caracteres).</p>
+      <div class="field">
+        <label class="label" for="pw-current">Senha atual</label>
+        <input class="input" id="pw-current" type="password" autocomplete="current-password" required>
+      </div>
+      <div class="field">
+        <label class="label" for="pw-new">Nova senha</label>
+        <input class="input" id="pw-new" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="field">
+        <label class="label" for="pw-confirm">Confirmar nova senha</label>
+        <input class="input" id="pw-confirm" type="password" autocomplete="new-password" minlength="8" required>
+      </div>
+      <div class="err-line" id="pw-err" role="alert"></div>
+      <div class="actions" style="margin-top:0">
+        <button type="button" class="btn ghost" id="pw-cancel">Cancelar</button>
+        <button type="submit" class="btn primary" id="pw-save">Salvar nova senha</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
