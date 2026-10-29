@@ -458,3 +458,13 @@ button { font: inherit; color: inherit; cursor: pointer; }
 /* ---- Painel sem emojis: o humor aparece como número ---- */
 .item .emo { font-size: 18px; font-weight: 700; font-family: var(--font-display); color: var(--c); }
 
+/* Recados de check-ins sem conversa */
+.solo-panel { margin-bottom: 16px; }
+.solo-list { display: grid; gap: 10px; margin-top: 12px; }
+.solo-item { display: flex; gap: 12px; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); }
+.solo-mood { flex: none; width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; }
+.solo-body { flex: 1; min-width: 0; }
+.solo-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.solo-top small { color: var(--muted); font-size: 12px; }
+.solo-body p { margin: 4px 0 0; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; }
+.solo-body p.muted { color: var(--muted); }
