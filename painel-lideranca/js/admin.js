@@ -369,7 +369,7 @@
     const box = $("#t-msgs");
     const near = box.scrollHeight - box.scrollTop - box.clientHeight < 120 || S.msgCount < 0;
     S.msgCount = data.length;
-    box.replaceChildren();
+       box.replaceChildren();
     if (!data.length) {
       box.append(h("div", { class: "empty" }, h("p", { text: `${label(r)} pediu para conversar com você, mas ainda não escreveu nada. Você pode dar o primeiro passo.` })));
     }
