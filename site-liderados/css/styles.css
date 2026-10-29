@@ -451,3 +451,9 @@ select.input { appearance: none; background-image: linear-gradient(45deg, transp
 select.input option { color: #190c36; }
 .leader.mine { border-color: rgba(255, 184, 28, .8); box-shadow: 0 10px 28px -16px rgba(255, 184, 28, .7); }
 .leader.mine .rl { color: #fde68a; font-weight: 600; }
+
+/* ---- Conversa encerrada ---- */
+.closed-note { padding: 16px 18px; border-top: 1px solid var(--border); display: grid; gap: 4px; text-align: center;
+  background: rgba(52, 211, 153, .08); color: var(--muted); font-size: 14px; }
+.closed-note strong { color: var(--ok); }
+.composer[hidden], .closed-note[hidden] { display: none; }
