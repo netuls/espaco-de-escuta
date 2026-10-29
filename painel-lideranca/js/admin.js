@@ -137,13 +137,13 @@
     const last = S.rows.filter((r) => new Date(r.created_at).getTime() >= since);
     const avg = last.length ? (last.reduce((s, r) => s + r.mood, 0) / last.length) : null;
     const cards = [
-      ["Aguardando sua resposta", wait, wait ? "⏳" : "✅"],
-      ["Liderados na equipe", S.team.length, S.team.length ? "👥" : ""],
+      ["Aguardando sua resposta", wait, ""],
+      ["Liderados na equipe", S.team.length, ""],
       ["Conversas abertas", open, ""],
-      ["Conversas agendadas", upcoming().length, upcoming().length ? "📅" : ""],
-      ["Satisfação com as conversas", S.fbs.length ? (S.fbs.reduce((t, f) => t + f.rating, 0) / S.fbs.length).toFixed(1) + " / 5" : "—", S.fbs.length ? "⭐" : ""],
+      ["Conversas agendadas", upcoming().length, ""],
+      ["Satisfação com as conversas", S.fbs.length ? (S.fbs.reduce((t, f) => t + f.rating, 0) / S.fbs.length).toFixed(1) + " / 5" : "—", ""],
       ["Check-ins (30 dias)", last.length, ""],
-      ["Humor médio (30 dias)", avg ? avg.toFixed(1) : "—", avg ? moodOf(Math.round(avg)).emoji : ""],
+      ["Humor médio (30 dias)", avg ? avg.toFixed(1) : "—", ""],
     ];
     $("#stats").replaceChildren(...cards.map(([k, v, e]) =>
       h("div", { class: "card stat" }, h("div", { class: "k", text: k }),
@@ -159,7 +159,7 @@
       const n = last.filter((r) => r.mood === m.v).length;
       const bar = h("i"); bar.dataset.w = Math.round((n / total) * 100);
       const wrap = h("div", { class: "bar" }, bar); wrap.style.setProperty("--c", m.color);
-      return h("div", { class: "dist-row" }, h("span", { text: m.emoji + " " + m.v }), wrap, h("span", { text: String(n) }));
+      return h("div", { class: "dist-row" }, h("span", { text: String(m.v) }), wrap, h("span", { text: String(n) }));
     });
     $("#dist").replaceChildren(...rows);
     requestAnimationFrame(() => $$("#dist i").forEach((i) => (i.style.width = i.dataset.w + "%")));
@@ -210,14 +210,14 @@
     const r = rowOf(a.checkin_id);
     const label2 = { scheduled: "Agendado", done: "Realizada", cancelled: "Cancelado" };
     const actions = a.status === "scheduled" ? h("div", { class: "row-actions" },
-      h("button", { class: "btn small", type: "button", text: "✔ Concluir", onclick: () => setApptStatus(a.id, "done") }),
+      h("button", { class: "btn small", type: "button", text: "Concluir", onclick: () => setApptStatus(a.id, "done") }),
       h("button", { class: "btn small danger", type: "button", text: "Cancelar", onclick: () => {
         if (confirm("Cancelar este agendamento? O liderado será avisado no chat.")) setApptStatus(a.id, "cancelled");
       } }),
       withName && r ? h("button", { class: "btn small ghost", type: "button", text: "Abrir conversa", onclick: () => openThread(r.id) }) : null) : null;
     return h("div", { class: "appt " + a.status },
       h("div", { class: "when", text: fmtWhen(a.scheduled_at) + (withName && r ? " · " + label(r) : "") }),
-      h("div", { class: "where", text: "📍 " + a.location }),
+      h("div", { class: "where", text: "Local: " + a.location }),
       a.notes ? h("div", { class: "notes", text: a.notes }) : null,
       h("span", { class: "tag " + a.status, text: label2[a.status] + (a.status === "scheduled" && !a.seen_by_member ? " · ainda não visto" : "") }),
       actions);
@@ -227,7 +227,7 @@
     const list = upcoming();
     const box = $("#agenda-list");
     if (!list.length) {
-      box.replaceChildren(h("p", { class: "sub", style: { margin: 0 }, text: "Nenhum encontro marcado. Abra uma conversa e use “📅 Agendar”." }));
+      box.replaceChildren(h("p", { class: "sub", style: { margin: 0 }, text: "Nenhum encontro marcado. Abra uma conversa e use “Agendar”." }));
       return;
     }
     box.replaceChildren(...list.map((a) => apptNode(a, true)));
@@ -243,15 +243,15 @@
       const diff = f.mood_after - r.mood;
       box.className = "feedback-box";
       box.replaceChildren(
-        h("strong", { text: "📝 Pesquisa de satisfação respondida" }),
-        h("div", {}, "Humor: ", before.emoji + " " + before.v, " → ", after.emoji + " " + after.v,
-          diff > 0 ? " (melhorou 💜)" : diff < 0 ? " (piorou — vale um novo contato)" : " (igual)"),
-        h("div", { class: "stars-line", text: "★".repeat(f.rating) + "☆".repeat(5 - f.rating) + "  " + f.rating + "/5" }),
+        h("strong", { text: "Pesquisa de satisfação respondida" }),
+        h("div", {}, "Humor: ", before.label + " (" + before.v + ")", " → ", after.label + " (" + after.v + ")",
+          diff > 0 ? " (melhorou)" : diff < 0 ? " (piorou — vale um novo contato)" : " (igual)"),
+        h("div", { class: "stars-line", text: "Nota da conversa: " + f.rating + " / 5" }),
         f.comment ? h("div", { class: "cmt", text: "“" + f.comment + "”" }) : null);
       box.hidden = false;
     } else if (r.status === "closed") {
       box.className = "feedback-box wait";
-      box.replaceChildren(h("span", { text: "📝 Conversa encerrada. Aguardando o liderado responder a pesquisa de satisfação." }));
+      box.replaceChildren(h("span", { text: "Conversa encerrada. Aguardando o liderado responder a pesquisa de satisfação." }));
       box.hidden = false;
     } else { box.hidden = true; box.replaceChildren(); }
   }
@@ -260,7 +260,7 @@
     const box = $("#t-agenda");
     const list = S.appts.filter((a) => a.checkin_id === S.selected);
     if (!list.length) { box.hidden = true; box.replaceChildren(); return; }
-    box.replaceChildren(h("div", { class: "agenda-title", text: "📅 Agendamentos desta conversa" }), ...list.map((a) => apptNode(a, false)));
+    box.replaceChildren(h("div", { class: "agenda-title", text: "Agendamentos desta conversa" }), ...list.map((a) => apptNode(a, false)));
     box.hidden = false;
   }
 
@@ -321,7 +321,6 @@
     const box = $("#items");
     if (!f.length) {
       box.replaceChildren(h("div", { class: "thread-empty", style: { padding: "30px 10px" } },
-        h("div", { style: { fontSize: "34px" }, text: S.filter === "wait" ? "🎉" : "📭" }),
         h("p", { text: S.filter === "wait" ? "Nenhuma conversa aguardando você." : "Nada por aqui ainda." })));
       return;
     }
@@ -331,10 +330,10 @@
       const badge = awaiting(r) ? h("span", { class: "badge wait", text: pres && !hasAppt(r) ? "Agendar" : "Responder" })
         : r.status === "closed" ? h("span", { class: "badge done", text: "Encerrada" })
         : h("span", { class: "badge open", text: "Aberta" });
-      const emo = h("span", { class: "emo", text: m.emoji }); emo.style.setProperty("--c", m.color);
+      const emo = h("span", { class: "emo", text: String(m.v) }); emo.style.setProperty("--c", m.color);
       const b = h("button", { class: "item" + (S.selected === r.id ? " sel" : ""), type: "button" },
         emo,
-        h("span", { class: "tx" }, h("strong", { text: label(r) }), h("small", { text: `Humor ${m.v} · ${timeAgo(r.last_activity)}${pres ? " · 🤝 presencial" : ""}` })),
+        h("span", { class: "tx" }, h("strong", { text: label(r) }), h("small", { text: `Humor ${m.v} · ${timeAgo(r.last_activity)}${pres ? " · presencial" : ""}` })),
         badge);
       b.addEventListener("click", () => openThread(r.id));
       return b;
@@ -360,57 +359,12 @@
     if (error) { console.error(error); return; }
     const m = moodOf(r.mood);
     $("#t-title").textContent = label(r);
-    $("#t-sub").textContent = `Humor ${m.v} ${m.emoji} · iniciado em ${new Date(r.created_at).toLocaleDateString("pt-BR")} · ${r.mode === "presencial" ? "🤝 prefere presencial" : "💬 chat"}`;
+    $("#t-sub").textContent = `Humor ${m.v} (${m.label}) · iniciado em ${new Date(r.created_at).toLocaleDateString("pt-BR")} · ${r.mode === "presencial" ? "prefere presencial" : "chat"}`;
     renderThreadAgenda(); renderThreadFeedback();
     const tg = $("#t-toggle");
-    tg.textContent = r.status === "closed" ? "Reabrir" : "✔ Encerrar conversa";
+    tg.textContent = r.status === "closed" ? "Reabrir" : "Encerrar conversa";
     tg.onclick = () => setStatus(r.id, r.status === "closed" ? "open" : "closed");
 
     if (!force && data.length === S.msgCount) return;
     const box = $("#t-msgs");
-    const near = box.scrollHeight - box.scrollTop - box.clientHeight < 120 || S.msgCount < 0;
-    S.msgCount = data.length;
-    box.replaceChildren();
-    if (!data.length) {
-      box.append(h("div", { class: "empty" }, h("div", { style: { fontSize: "40px" }, text: "🙋" }),
-        h("p", { text: `${label(r)} pediu para conversar com você, mas ainda não escreveu nada. Você pode dar o primeiro passo.` })));
-    }
-    data.forEach((msg) => {
-      const mineMsg = msg.sender === "leader";
-      box.append(h("div", { class: "bubble " + (mineMsg ? "me" : "them") },
-        mineMsg ? null : h("span", { class: "sender", text: label(r) }),
-        msg.body, h("span", { class: "meta", text: fmtTime(msg.created_at) })));
-    });
-    if (near) box.scrollTop = box.scrollHeight;
-  }
-
-  async function setStatus(id, status) {
-    const { error } = await sb.from("checkins").update({ status }).eq("id", id);
-    if (error) { console.error(error); return toast("Não foi possível atualizar.", true); }
-    toast(status === "closed" ? "Conversa encerrada. O liderado vai receber a pesquisa de satisfação." : "Conversa reaberta.");
-    await loadList(); await refreshThread(true);
-  }
-
-  $("#t-composer").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const ta = $("#t-reply"); const body = ta.value.trim();
-    if (!body || !S.selected) return;
-    const btn = $("#t-send"); btn.disabled = true;
-    const { error } = await sb.from("messages").insert({ checkin_id: S.selected, sender: "leader", body });
-    btn.disabled = false;
-    if (error) { console.error(error); return toast("Não foi possível enviar.", true); }
-    ta.value = ""; ta.style.height = "";
-    await loadList(); await refreshThread(true);
-    $("#t-msgs").scrollTop = $("#t-msgs").scrollHeight;
-  });
-  $("#t-reply").addEventListener("keydown", (e) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#t-composer").requestSubmit(); }
-  });
-  $("#t-reply").addEventListener("input", (e) => {
-    e.target.style.height = "auto";
-    e.target.style.height = Math.min(e.target.scrollHeight, 140) + "px";
-  });
-  $("#thread-back").addEventListener("click", () => $("#thread-panel").classList.remove("open"));
-
-  init();
-})();
+    const near =
