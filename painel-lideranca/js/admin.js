@@ -367,4 +367,48 @@
 
     if (!force && data.length === S.msgCount) return;
     const box = $("#t-msgs");
-    const near =
+    const near = box.scrollHeight - box.scrollTop - box.clientHeight < 120 || S.msgCount < 0;
+    S.msgCount = data.length;
+    box.replaceChildren();
+    if (!data.length) {
+      box.append(h("div", { class: "empty" }, h("p", { text: `${label(r)} pediu para conversar com você, mas ainda não escreveu nada. Você pode dar o primeiro passo.` })));
+    }
+    data.forEach((msg) => {
+      const mineMsg = msg.sender === "leader";
+      box.append(h("div", { class: "bubble " + (mineMsg ? "me" : "them") },
+        mineMsg ? null : h("span", { class: "sender", text: label(r) }),
+        msg.body, h("span", { class: "meta", text: fmtTime(msg.created_at) })));
+    });
+    if (near) box.scrollTop = box.scrollHeight;
+  }
+
+  async function setStatus(id, status) {
+    const { error } = await sb.from("checkins").update({ status }).eq("id", id);
+    if (error) { console.error(error); return toast("Não foi possível atualizar.", true); }
+    toast(status === "closed" ? "Conversa encerrada. O liderado vai receber a pesquisa de satisfação." : "Conversa reaberta.");
+    await loadList(); await refreshThread(true);
+  }
+
+  $("#t-composer").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const ta = $("#t-reply"); const body = ta.value.trim();
+    if (!body || !S.selected) return;
+    const btn = $("#t-send"); btn.disabled = true;
+    const { error } = await sb.from("messages").insert({ checkin_id: S.selected, sender: "leader", body });
+    btn.disabled = false;
+    if (error) { console.error(error); return toast("Não foi possível enviar.", true); }
+    ta.value = ""; ta.style.height = "";
+    await loadList(); await refreshThread(true);
+    $("#t-msgs").scrollTop = $("#t-msgs").scrollHeight;
+  });
+  $("#t-reply").addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#t-composer").requestSubmit(); }
+  });
+  $("#t-reply").addEventListener("input", (e) => {
+    e.target.style.height = "auto";
+    e.target.style.height = Math.min(e.target.scrollHeight, 140) + "px";
+  });
+  $("#thread-back").addEventListener("click", () => $("#thread-panel").classList.remove("open"));
+
+  init();
+})();
