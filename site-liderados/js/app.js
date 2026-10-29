@@ -272,6 +272,7 @@
     });
     if (error) { console.error("submit_feedback:", error.code, error.message); syncSurvey(); return toast("Não foi possível enviar a pesquisa agora.", true); }
     SV.dismissed = true; $("#survey").hidden = true;
+    forget(); // conversa encerrada e respondida: deixa de aparecer na tela inicial
     toast("Obrigado! Sua resposta ajuda muito. 💜");
   }
 
@@ -378,11 +379,16 @@
     try {
       const d = await fetchThread(t);
       if (d && d.checkin.leader_name) {
+        const closed = d.checkin.status === "closed";
+        const needSurvey = closed && !d.feedback;
+        // Conversa encerrada e pesquisa já resolvida: não aparece mais para o liderado.
+        if (closed && !needSurvey) { forget(); return; }
         $("#resume-name").textContent = d.checkin.leader_name;
-        const newAppt = (d.appointments || []).some((a) => !a.seen && a.status === "scheduled");
-        const needSurvey = d.checkin.status === "closed" && !d.feedback;
-        $("#resume-new").textContent = newAppt ? "📅 Novo agendamento" : "📝 Pesquisa rápida";
-        $("#resume-new").hidden = !(newAppt || needSurvey);
+        $("#resume-pre").textContent = closed ? "📝 Sua conversa foi encerrada. Conte como foi com" : "💬 Você tem uma conversa em andamento com";
+        $("#resume-btn").textContent = closed ? "Responder pesquisa" : "Continuar conversa";
+        const newAppt = !closed && (d.appointments || []).some((a) => !a.seen && a.status === "scheduled");
+        $("#resume-new").textContent = "📅 Novo agendamento";
+        $("#resume-new").hidden = !newAppt;
         $("#resume").hidden = false;
       } else if (!d) forget();
     } catch { /* ignora */ }
@@ -531,7 +537,7 @@
   $("#auth-form").addEventListener("submit", submitAuth);
   $("#logout").addEventListener("click", logout);
   $("#sv-send").addEventListener("click", sendSurvey);
-  $("#sv-skip").addEventListener("click", () => { SV.dismissed = true; $("#survey").hidden = true; });
+  $("#sv-skip").addEventListener("click", () => { SV.dismissed = true; $("#survey").hidden = true; forget(); });
 
   bootAuth();
 })();
