@@ -66,7 +66,7 @@
       wrap.append(b);
     });
     const none = h("button", { type: "button", class: "leader none", text: "Por enquanto não preciso conversar — só registrar como estou" });
-    none.addEventListener("click", () => submit(false));
+    none.addEventListener("click", () => { state.leader = null; goStep(6); });
     wrap.append(none);
   }
 
@@ -78,6 +78,17 @@
         $("#name-field").hidden = !named;
         if (named && !$("#name").value && A.member) $("#name").value = A.member.full_name || "";
         if (named) $("#name").focus();
+      }));
+  }
+
+  function bindIdentitySolo() {
+    $$('input[name="ident2"]').forEach((r) =>
+      r.addEventListener("change", () => {
+        syncChoices();
+        const named = $('input[name="ident2"]:checked').value === "named";
+        $("#name2-field").hidden = !named;
+        if (named && !$("#name2").value && A.member) $("#name2").value = A.member.full_name || "";
+        if (named) $("#name2").focus();
       }));
   }
 
@@ -103,18 +114,21 @@
 
   async function submit(withLeader) {
     if (!sb) return toast("Site ainda não configurado (js/config.js).", true);
-    const btn = withLeader ? $("#send") : null;
+    const btn = withLeader ? $("#send") : $("#send-solo");
     if (btn) btn.disabled = true;
     const token = genToken();
-    const named = withLeader && $('input[name="ident"]:checked').value === "named";
-    const name = named ? $("#name").value.trim() : "";
+    // Com ou sem conversa, o liderado escolhe se quer se identificar e pode deixar um texto.
+    const identSel = withLeader ? 'input[name="ident"]:checked' : 'input[name="ident2"]:checked';
+    const named = $(identSel).value === "named";
+    const name = named ? $(withLeader ? "#name" : "#name2").value.trim() : "";
+    const text = $(withLeader ? "#msg" : "#note").value.trim();
     if (named && !name) { if (btn) btn.disabled = false; return toast("Digite seu nome ou escolha anônimo.", true); }
 
     const { error } = await sb.rpc("submit_checkin", {
       p_mood: state.mood,
       p_leader: withLeader ? state.leader : null,
       p_name: named ? name : null,
-      p_message: withLeader ? ($("#msg").value.trim() || null) : null,
+      p_message: text || null,
       p_token: token,
       p_mode: withLeader ? currentMode() : "chat",
     });
@@ -138,6 +152,9 @@
         : "vai poder responder por aqui.";
       goStep(4);
     } else {
+      $("#done5-text").textContent = "Seu check-in foi registrado" +
+        (named ? " com o seu nome" : " de forma anônima") +
+        (text ? (named ? " e o comentário foi enviado à liderança." : ", com o seu comentário.") : ".");
       goStep(5);
     }
   }
@@ -155,6 +172,9 @@
     $("#msg-label").textContent = "O que você gostaria de compartilhar?";
     $("#send").textContent = "Enviar para a liderança";
     $("#name-field").hidden = true;
+    $('input[name="ident2"][value="anon"]').checked = true;
+    $("#name2").value = ""; $("#note").value = ""; $("#name2-field").hidden = true;
+    syncChoices();
     goStep(1);
   }
 
@@ -474,6 +494,7 @@
   buildTeams();
   buildLeaders();
   bindIdentity();
+  bindIdentitySolo();
   bindMode();
   $$(".choice label").forEach((l) => l.addEventListener("click", (e) => {
     const i = l.querySelector("input");
@@ -484,6 +505,7 @@
   $("#to-2").addEventListener("click", () => goStep(2));
   $$("[data-back]").forEach((b) => b.addEventListener("click", () => goStep(Number(b.dataset.back))));
   $("#send").addEventListener("click", () => submit(true));
+  $("#send-solo").addEventListener("click", () => submit(false));
   $("#copy-code").addEventListener("click", () => copyText($("#done-code").textContent));
   $("#open-thread").addEventListener("click", () => openThread(state.token));
   $("#again").addEventListener("click", resetWizard);
