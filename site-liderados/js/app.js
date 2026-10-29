@@ -1,4 +1,4 @@
-// Site dos liderados: check-in de humor, escolha da liderança e chat por código.
+// Site dos liderados: check-in de humor, conversa com a própria liderança e chat por código.
 (function () {
   const TOKEN_KEY = "ee_token";
   const POLL_MS = 8000;
@@ -55,16 +55,21 @@
     APP_CONFIG.LEADERS.forEach((n) => sel.append(h("option", { value: n, text: "Equipe " + n })));
   }
 
-  function buildLeaders() {
+  // O liderado só conversa com a liderança da própria equipe (sem escolher).
+  function renderMyLeader(team) {
     const wrap = $("#leaders");
-    APP_CONFIG.LEADERS.forEach((name) => {
-      const b = h("button", { type: "button", class: "leader" },
-        avatar(name),
-        h("span", {}, h("span", { class: "nm", text: name }), h("span", { class: "rl", text: "Liderança" })));
-      b.dataset.name = name;
-      b.addEventListener("click", () => { state.leader = name; $("#pick-name").textContent = name; goStep(3); });
+    wrap.replaceChildren();
+    state.leader = team || null;
+    if (!team) {
+      wrap.append(h("div", { class: "notice soft", text: "Sua conta ainda não tem uma liderança vinculada. Fale com o RH para ajustar." }));
+    } else {
+      $("#pick-name").textContent = team;
+      const b = h("button", { type: "button", class: "leader mine" },
+        avatar(team),
+        h("span", {}, h("span", { class: "nm", text: team }), h("span", { class: "rl", text: "Sua liderança" })));
+      b.addEventListener("click", () => { state.leader = team; $("#pick-name").textContent = team; goStep(3); });
       wrap.append(b);
-    });
+    }
     const none = h("button", { type: "button", class: "leader none", text: "Por enquanto não preciso conversar — só registrar como estou" });
     none.addEventListener("click", () => { state.leader = null; goStep(6); });
     wrap.append(none);
@@ -160,7 +165,7 @@
   }
 
   function resetWizard() {
-    state.mood = null; state.leader = null;
+    state.mood = null; state.leader = A.member ? A.member.team || null : null;
     $$(".mood").forEach((x) => { x.classList.remove("sel"); x.setAttribute("aria-checked", "false"); });
     $("#mood-caption").textContent = "";
     $("#to-2").disabled = true;
@@ -413,24 +418,12 @@
     $("#auth-err").textContent = msg || "";
   }
 
-  // Destaca (e põe primeiro) a liderança da equipe do liderado.
-  function markMyLeader(team) {
-    const wrap = $("#leaders");
-    $$(".leader[data-name]").forEach((b) => {
-      const mine = team && b.dataset.name === team;
-      const rl = b.querySelector(".rl");
-      if (rl) rl.textContent = mine ? "Sua liderança" : "Liderança";
-      b.classList.toggle("mine", !!mine);
-      if (mine) wrap.prepend(b);
-    });
-  }
-
   function showApp(member) {
     A.member = member;
     $("#view-auth").hidden = true; $("#view-main").hidden = false;
     $("#who-name").textContent = (member.full_name || "").split(" ")[0];
     $("#who").hidden = false;
-    markMyLeader(member.team);
+    renderMyLeader(member.team);
     checkResume();
   }
 
@@ -498,7 +491,7 @@
   buildMoods();
   buildSurvey();
   buildTeams();
-  buildLeaders();
+  renderMyLeader(null);
   bindIdentity();
   bindIdentitySolo();
   bindMode();
