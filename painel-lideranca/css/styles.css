@@ -442,4 +442,15 @@ button { font: inherit; color: inherit; cursor: pointer; }
   box-shadow: 0 0 0 100vmax rgba(5, 2, 14, .78), 0 30px 80px -20px rgba(0, 0, 0, .8);
 }
 .survey .moods { gap: 6px; }
-.survey .mood { padding: 10px 4px; }
+.survey .mood { padding: 10px 4px; } 
+
+/* ---- Minha equipe ---- */
+.team-panel { margin-bottom: 16px; }
+.team-count { color: var(--muted); font-weight: 600; }
+.team-list { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); margin-top: 12px; }
+.member { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px;
+  background: var(--surface-2); border: 1px solid var(--border, rgba(255,255,255,.08)); }
+.member .tx { flex: 1; min-width: 0; }
+.member .tx strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.member .tx small { color: var(--muted); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.member .since { color: var(--muted); font-size: 11px; flex: none; }
