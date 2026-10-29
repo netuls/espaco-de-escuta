@@ -2,7 +2,7 @@
 (function () {
   const POLL_LIST_MS = 15000;
   const POLL_THREAD_MS = 8000;
-  const S = { me: null, rows: [], appts: [], fbs: [], filter: "wait", selected: null, msgCount: -1, listTimer: null, threadTimer: null };
+  const S = { me: null, rows: [], appts: [], fbs: [], team: [], filter: "wait", selected: null, msgCount: -1, listTimer: null, threadTimer: null };
 
   if (!window.isConfigured) { showSetupWarning(); }
   const siteUrl = APP_CONFIG.SITE_URL || "";
@@ -31,7 +31,7 @@
 
   function showLogin() {
     stopTimers();
-    S.me = null; S.rows = []; S.appts = []; S.fbs = []; S.selected = null;
+    S.me = null; S.rows = []; S.appts = []; S.fbs = []; S.team = []; S.selected = null;
     $("#view-login").hidden = false;
     $("#view-dash").hidden = true;
     $("#who").hidden = true; $("#logout").hidden = true; $("#pw-btn").hidden = true; $("#back-site").hidden = !siteUrl;
@@ -122,7 +122,9 @@
     const fb = await sb.from("feedbacks").select("checkin_id, mood_after, rating, comment, created_at")
       .order("created_at", { ascending: false }).limit(1000);
     if (fb.error) console.error(fb.error); else S.fbs = fb.data;
-    renderStats(); renderDist(); renderTrend(); renderAgendaPanel(); renderList();
+    const tm = await sb.rpc("list_my_members");
+    if (tm.error) { console.error(tm.error); S.teamErr = true; } else { S.team = tm.data || []; S.teamErr = false; }
+    renderStats(); renderDist(); renderTrend(); renderTeam(); renderAgendaPanel(); renderList();
     if (S.selected) { renderThreadAgenda(); renderThreadFeedback(); }
   }
 
@@ -136,6 +138,7 @@
     const avg = last.length ? (last.reduce((s, r) => s + r.mood, 0) / last.length) : null;
     const cards = [
       ["Aguardando sua resposta", wait, wait ? "⏳" : "✅"],
+      ["Liderados na equipe", S.team.length, S.team.length ? "👥" : ""],
       ["Conversas abertas", open, ""],
       ["Conversas agendadas", upcoming().length, upcoming().length ? "📅" : ""],
       ["Satisfação com as conversas", S.fbs.length ? (S.fbs.reduce((t, f) => t + f.rating, 0) / S.fbs.length).toFixed(1) + " / 5" : "—", S.fbs.length ? "⭐" : ""],
@@ -181,6 +184,25 @@
     });
     $("#trend").replaceChildren(...cols);
     requestAnimationFrame(() => $$("#trend i").forEach((i) => (i.style.height = i.dataset.h + "%")));
+  }
+
+  // ---------- equipe ----------
+  function renderTeam() {
+    const box = $("#team-list");
+    $("#team-count").textContent = S.team.length ? "· " + S.team.length : "";
+    if (S.teamErr) {
+      box.replaceChildren(h("p", { class: "sub", style: { margin: 0 }, text: "Não foi possível carregar a equipe. Rode o arquivo supabase/equipe-lideranca.sql no Supabase." }));
+      return;
+    }
+    if (!S.team.length) {
+      box.replaceChildren(h("p", { class: "sub", style: { margin: 0 }, text: "Ninguém escolheu você como equipe ainda. Os liderados aparecem aqui assim que se cadastrarem." }));
+      return;
+    }
+    box.replaceChildren(...S.team.map((m) =>
+      h("div", { class: "member" },
+        avatar(m.full_name, 38),
+        h("div", { class: "tx" }, h("strong", { text: m.full_name }), h("small", { text: m.email || "" })),
+        h("span", { class: "since", text: "desde " + new Date(m.created_at).toLocaleDateString("pt-BR") }))));
   }
 
   // ---------- agenda ----------
