@@ -41,7 +41,12 @@
     const { data: u } = await sb.auth.getUser();
     const uid = u?.user?.id;
     const { data: rows, error } = await sb.from("leaders").select("name").eq("id", uid).limit(1);
-    if (error || !rows || !rows.length) {
+    if (error) {
+      console.error("leaders:", error);
+      $("#login-err").textContent = "Não foi possível verificar o acesso agora. Recarregue a página.";
+      return showLogin();
+    }
+    if (!rows || !rows.length) {
       await sb.auth.signOut();
       $("#login-err").textContent = "Este usuário não está cadastrado como liderança.";
       return showLogin();
@@ -112,7 +117,7 @@
   // ---------- dados ----------
   async function loadList() {
     const { data, error } = await sb.from("checkins")
-      .select("id, mood, leader_name, display_name, status, mode, last_sender, created_at, last_activity")
+      .select("id, mood, leader_name, display_name, comment, status, mode, last_sender, created_at, last_activity")
       .order("last_activity", { ascending: false }).limit(1000);
     if (error) { console.error(error); return toast("Erro ao carregar os dados.", true); }
     S.rows = data;
@@ -124,7 +129,7 @@
     if (fb.error) console.error(fb.error); else S.fbs = fb.data;
     const tm = await sb.rpc("list_my_members");
     if (tm.error) { console.error(tm.error); S.teamErr = true; } else { S.team = tm.data || []; S.teamErr = false; }
-    renderStats(); renderDist(); renderTrend(); renderTeam(); renderAgendaPanel(); renderList();
+    renderStats(); renderDist(); renderTrend(); renderSolo(); renderTeam(); renderAgendaPanel(); renderList();
     if (S.selected) { renderThreadAgenda(); renderThreadFeedback(); }
   }
 
@@ -187,6 +192,31 @@
   }
 
   // ---------- equipe ----------
+  // Check-ins sem conversa em que a pessoa se identificou e/ou deixou um comentário.
+  function renderSolo() {
+    const box = $("#solo-list");
+    const since = Date.now() - 30 * 864e5;
+    const list = S.rows
+      .filter((r) => !r.leader_name && (r.display_name || r.comment) && new Date(r.created_at).getTime() >= since)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 50);
+    $("#solo-count").textContent = list.length ? "· " + list.length : "";
+    if (!list.length) {
+      box.replaceChildren(h("p", { class: "sub", style: { margin: 0 }, text: "Nenhum recado por enquanto." }));
+      return;
+    }
+    box.replaceChildren(...list.map((r) => {
+      const m = moodOf(r.mood);
+      return h("div", { class: "solo-item" },
+        h("div", { class: "solo-mood", style: { background: m.color }, title: m.label, text: m.emoji }),
+        h("div", { class: "solo-body" },
+          h("div", { class: "solo-top" },
+            h("strong", { text: r.display_name || "Anônimo" }),
+            h("small", { text: "humor " + m.v + " · " + fmtWhen(r.created_at) })),
+          r.comment ? h("p", { text: r.comment }) : h("p", { class: "muted", text: "Sem comentário." })));
+    }));
+  }
+
   function renderTeam() {
     const box = $("#team-list");
     $("#team-count").textContent = S.team.length ? "· " + S.team.length : "";
