@@ -176,6 +176,9 @@
     const st = $("#chat-status");
     st.textContent = c.status === "closed" ? "✔ Encerrada" : "● Aberta";
     st.style.color = c.status === "closed" ? "var(--ok)" : "var(--muted)";
+    // Conversa encerrada: some o campo de mensagem e aparece o aviso.
+    $("#composer").hidden = c.status === "closed";
+    $("#closed-note").hidden = c.status !== "closed";
 
     const box = $("#msgs");
     const count = data.messages.length;
@@ -324,7 +327,16 @@
     btn.disabled = true;
     const { error } = await sb.rpc("send_member_message", { p_token: state.token, p_body: body });
     btn.disabled = false;
-    if (error) { console.error(error); return toast("Não foi possível enviar a mensagem.", true); }
+    if (error) {
+      console.error(error);
+      if (/encerrada/i.test(error.message || "")) {
+        toast("Esta conversa foi encerrada pela liderança.", true);
+        const d0 = await fetchThread(state.token);
+        if (d0) { state.lastCount = -1; renderThread(d0); }
+        return;
+      }
+      return toast("Não foi possível enviar a mensagem.", true);
+    }
     ta.value = ""; ta.style.height = "";
     state.lastCount = -2;
     const d = await fetchThread(state.token);
