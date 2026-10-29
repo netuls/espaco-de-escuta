@@ -3,11 +3,11 @@
   const cfg = window.APP_CONFIG;
 
   window.MOODS = [
-    { v: 1, emoji: "😞", label: "Muito mal", color: "#ef4444" },
-    { v: 2, emoji: "😕", label: "Mal", color: "#f97316" },
-    { v: 3, emoji: "😐", label: "Mais ou menos", color: "#eab308" },
-    { v: 4, emoji: "🙂", label: "Bem", color: "#22c55e" },
-    { v: 5, emoji: "😄", label: "Muito bem", color: "#06b6d4" },
+    { v: 1, label: "Muito mal", color: "#ef4444" },
+    { v: 2, label: "Mal", color: "#f97316" },
+    { v: 3, label: "Mais ou menos", color: "#eab308" },
+    { v: 4, label: "Bem", color: "#22c55e" },
+    { v: 5, label: "Muito bem", color: "#06b6d4" },
   ];
 
   window.isConfigured =
@@ -100,6 +100,6 @@
 
   window.showSetupWarning = () => {
     document.body.prepend(h("div", { class: "notice", style: { margin: "0", borderRadius: "0", textAlign: "center" },
-      text: "⚙️ Configure js/config.js com a URL e a anon key do seu projeto Supabase." }));
+      text: "Configure js/config.js com a URL e a anon key do seu projeto Supabase." }));
   };
 })();
